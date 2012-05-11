@@ -1,0 +1,30 @@
+<!doctype html5>
+
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <section class="month">
+      <h2><%= @month.strftime "%B %Y" %></h2>
+
+      <div class="weekdays">
+        <% @month.weekdays.each do |day| %>
+          <div class="day"><%= day.strftime "%a" %></div>
+        <% end %>
+      </div>
+
+      <% @month.weeks.each do |week| %>
+        <div class="week">
+          <% week.days.each do |day| %>
+            <div class="day<% if day.today? %> today<% end %><% if day.weekend? %> weekend<% end %><% unless @month.include?(day) %> dull<% end %><% if is_checked(day) %> checked<% end %>">
+              <% if is_checked(day) %><span class="check" style="-webkit-transform: rotate(<%= @month.random_angle %>deg)">✘</span><% end %>
+              <h3><%= day.strftime "%d" %></h3>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  </body>
+</html>
