@@ -17,7 +17,7 @@ end
 
 helpers do
   def is_checked day
-    @checked_days.include? day.date
+    @chain.include? day.date
   end
 end
 
@@ -26,9 +26,9 @@ get "/" do
   token = request.cookies["token"]
   redirect "/auth" unless token
 
-  user = HealthGraph::User.new(token)
-  @checked_days = get_checked_days!(user)
-  @month = Month.new(Date.today)
+  user = HealthGraph::User.new token
+  @chain = get_chain get_checked_days! user
+  @month = Month.new Date.today
 
   erb :calendar
 end
@@ -42,7 +42,8 @@ get "/auth" do
 end
 
 get "/callback" do
-  response.set_cookie "token", HealthGraph.access_token(params[:code])
+  token = HealthGraph.access_token params[:code]
+  response.set_cookie "token", token
   redirect "/"
 end
 
@@ -61,10 +62,21 @@ def get_checked_days! user
   end
 end
 
+def get_chain days
+  Set.new.tap do |chain|
+    day = Date.today
+
+    while days.include? day
+      chain.add day
+      day -= 1
+    end
+  end
+end
+
 
 class Month
   def initialize date
-    @prng = Random.new(date.month)
+    @prng = Random.new date.month
     @date = date
   end
 
@@ -111,7 +123,7 @@ class Week
 
   def days
     first_day.upto(last_day).map do |date|
-      Day.new(date)
+      Day.new date
     end
   end
 
