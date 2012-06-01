@@ -6,23 +6,30 @@
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
-    <h2><%= @month.strftime "%B %Y" %></h2>
-    <section class="month" data-weeks="<%= @month.weeks.length %>">
-      <% @month.weeks.each do |week| %>
-        <div class="week">
-          <% week.days.each do |day| %>
-            <div class="day<% if day.today? %> today<% end %><% if day.weekend? %> weekend<% end %><% unless @month.include?(day) %> dull<% end %><% if is_checked(day) %> checked<% end %>">
-              <div>
-                <h3>
-                  <% if first_week(day) %><span class="weekday"><%= day.strftime "%a" %></span><% end %>
-                  <%= day.strftime "%d" %>
-                </h3>
-                <% if is_checked(day) %><span class="check" style="-webkit-transform: rotate(<%= @month.random_angle %>deg)">✘</span><% end %>
+    <% @months.each do |month| %>
+      <h2 id="<%= month.anchor %>">
+        <a href="#<%= month.anchor %>">
+          <%= month.strftime "%B %Y" %>
+        </a>
+      </h2>
+
+      <section class="month" data-weeks="<%= month.weeks.length %>">
+        <% month.weeks.each do |week| %>
+          <div class="week">
+            <% week.days.each do |day| %>
+              <div class="day<% if day.today? %> today<% end %><% if day.weekend? %> weekend<% end %><% unless month.include?(day) %> dull<% end %><% if is_checked(day) %> checked<% end %>">
+                <div>
+                  <h3>
+                    <% if month.weeks.first.include? day %><span class="weekday"><%= day.strftime "%a" %></span><% end %>
+                    <%= day.strftime "%d" %>
+                  </h3>
+                  <% if is_checked(day) %><span class="check" style="-webkit-transform: rotate(<%= month.random_angle %>deg)">✘</span><% end %>
+                </div>
               </div>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
-    </section>
+            <% end %>
+          </div>
+        <% end %>
+      </section>
+    <% end %>
   </body>
 </html>

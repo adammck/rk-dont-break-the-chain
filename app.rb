@@ -19,10 +19,6 @@ helpers do
   def is_checked day
     @chain.include? day.date
   end
-
-  def first_week day
-    @month.weeks.first.include? day
-  end
 end
 
 
@@ -32,7 +28,7 @@ get "/" do
 
   user = HealthGraph::User.new token
   @chain = get_chain get_checked_days! user
-  @month = Month.new Date.today
+  @months = months_for_chain @chain
 
   erb :calendar
 end
@@ -49,6 +45,11 @@ end
 
 get "/style.css" do
   scss :style
+end
+
+
+def months_for_chain days
+  days.map { |day| Month.new(day) }.uniq.sort
 end
 
 
@@ -78,9 +79,22 @@ def get_chain days
 end
 
 class Month
+  include Comparable
+
   def initialize date
-    @prng = Random.new date.month
     @date = date
+  end
+
+  def hash
+    first_day.hash
+  end
+
+  def eql? other
+    hash == other.hash
+  end
+
+  def <=> other
+    first_day <=> other.first_day
   end
 
   def weeks
@@ -98,7 +112,11 @@ class Month
   end
 
   def random_angle
-    20 - @prng.rand(40)
+    20 - prng.rand(40)
+  end
+
+  def anchor
+    strftime("%b%y").downcase
   end
 
   def first_day
@@ -109,6 +127,10 @@ class Month
 
   def last_day
     first_day.next_month.prev_day
+  end
+
+  def prng
+    @prng ||= Random.new @date.month
   end
 end
 
