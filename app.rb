@@ -19,6 +19,10 @@ helpers do
   def is_checked day
     @chain.include? day.date
   end
+
+  def first_week day
+    @month.weeks.first.include? day
+  end
 end
 
 
@@ -33,10 +37,6 @@ get "/" do
   erb :calendar
 end
 
-get "/style.css" do
-  scss :style
-end
-
 get "/auth" do
   redirect HealthGraph.authorize_url
 end
@@ -45,6 +45,10 @@ get "/callback" do
   token = HealthGraph.access_token params[:code]
   response.set_cookie "token", token
   redirect "/"
+end
+
+get "/style.css" do
+  scss :style
 end
 
 
@@ -73,7 +77,6 @@ def get_chain days
   end
 end
 
-
 class Month
   def initialize date
     @prng = Random.new date.month
@@ -83,13 +86,6 @@ class Month
   def weeks
     first_day.step(last_day, 7).map do |date|
       Week.new date
-    end
-  end
-
-  def weekdays
-    sunday = Date.today - Date.today.wday
-    sunday.upto(sunday + 6).map do |date|
-      Day.new date
     end
   end
 
@@ -105,11 +101,11 @@ class Month
     20 - @prng.rand(40)
   end
 
-  private
-
   def first_day
     DateTime.new @date.year, @date.month, 1
   end
+
+  private
 
   def last_day
     first_day.next_month.prev_day
@@ -125,6 +121,10 @@ class Week
     first_day.upto(last_day).map do |date|
       Day.new date
     end
+  end
+
+  def include? date
+    (date >= first_day) and (date <= last_day)
   end
 
   private
